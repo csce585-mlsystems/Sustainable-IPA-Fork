@@ -2,6 +2,7 @@ import subprocess
 import os
 import sys
 import time
+import numpy as np
 
 # Parse command line arguments
 import argparse
@@ -25,7 +26,7 @@ script2_path = os.path.join(runner_folder, "adaptation_runner.py")
 
 # Define a function to run each script in a separate subprocess
 def run_script(script_path, config_name):
-    return subprocess.Popen(["python", script_path, "--config-name", config_name])
+    return subprocess.Popen(["python3", script_path, "--config-name", config_name])
 
 
 # Start the two subprocesses
