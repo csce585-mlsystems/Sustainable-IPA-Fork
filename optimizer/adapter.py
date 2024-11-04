@@ -62,6 +62,7 @@ class Adapter:
         batching_cap: int,
         alpha: float,
         beta: float,
+        delta: float,
         gamma: float,
         num_state_limit: int,
         monitoring_duration: int,
@@ -87,6 +88,7 @@ class Adapter:
             scaling_cap (int)
             alpha (float): accuracy weight
             beta (float): resource weight
+            delta (float): energy weight
             gamma (float): batching weight
             num_state_limit (int): cap on the number of optimal states
             monitoring_duration (int): the monitoring
@@ -112,6 +114,7 @@ class Adapter:
         self.batching_cap = batching_cap
         self.alpha = alpha
         self.beta = beta
+        self.delta = delta
         self.gamma = gamma
         self.num_state_limit = num_state_limit
         self.monitoring_duration = monitoring_duration
@@ -234,6 +237,7 @@ class Adapter:
                 batching_cap=self.batching_cap,
                 alpha=self.alpha,
                 beta=self.beta,
+                delta=self.delta,
                 gamma=self.gamma,
                 arrival_rate=predicted_load,
                 num_state_limit=self.num_state_limit,
@@ -244,6 +248,7 @@ class Adapter:
                     [
                         "accuracy_objective",
                         "resource_objective",
+                        "energy_objective",
                         "batch_objective",
                         "objective",
                     ]
@@ -591,6 +596,9 @@ class Monitoring:
             self.adaptation_report["timesteps"][timestep]["resource_objective"] = float(
                 objective["resource_objective"][0]
             )
+            self.adaptation_report["timesteps"][timestep]["energy_objective"] = float(
+                objective["energy_objective"][0]
+            )
             self.adaptation_report["timesteps"][timestep]["batch_objective"] = float(
                 objective["batch_objective"][0]
             )
@@ -600,6 +608,7 @@ class Monitoring:
         else:
             self.adaptation_report["timesteps"][timestep]["resource_objective"] = None
             self.adaptation_report["timesteps"][timestep]["accuracy_objective"] = None
+            self.adaptation_report["timesteps"][timestep]["energy_objective"] = None
             self.adaptation_report["timesteps"][timestep]["batch_objective"] = None
             self.adaptation_report["timesteps"][timestep]["objective"] = None
         self.adaptation_report["timesteps"][timestep]["time_interval"] = time_interval

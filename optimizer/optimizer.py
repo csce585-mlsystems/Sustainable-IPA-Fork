@@ -55,6 +55,12 @@ class Optimizer:
         resource_objective = self.pipeline.cpu_usage
         return resource_objective
 
+    def energy_objective(self) -> float:
+        """
+        Energy consumption objective function of the pipeline.
+        """
+        return self.pipeline.energy_objective
+
     def batch_objective(self) -> float:
         """
         batch objecive of the pipeline
@@ -64,17 +70,19 @@ class Optimizer:
             max_batch += task.batch
         return max_batch
 
-    def objective(self, alpha: float, beta: float, gamma: float) -> Dict[str, float]:
+    def objective(self, alpha: float, beta: float, gamma: float, delta: float) -> Dict[str, float]:
         """
         objective function of the pipeline
         """
         objectives = {}
         objectives["accuracy_objective"] = alpha * self.accuracy_objective()
         objectives["resource_objective"] = beta * self.resource_objective()
+        objectives["energy_objective"] = delta * self.energy_objective()
         objectives["batch_objective"] = gamma * self.batch_objective()
         objectives["objective"] = (
             objectives["accuracy_objective"]
             - objectives["resource_objective"]
+            - objectives["energy_objective"]
             - objectives["batch_objective"]
         )
         return objectives
@@ -380,8 +388,10 @@ class Optimizer:
                         state["alpha"] = alpha
                         state["beta"] = beta
                         state["gamma"] = gamma
+                        state["delta"] = delta
                         state["accuracy_objective"] = self.accuracy_objective()
                         state["resource_objective"] = self.resource_objective()
+                        state["energy_objective"] = self.energy_objective()
                         state["batch_objective"] = self.batch_objective()
 
                     for task_id_j in range(self.pipeline.num_nodes):
@@ -794,6 +804,7 @@ class Optimizer:
         model.setObjective(
             alpha * accuracy_objective
             - beta * resource_objective
+            - delta * energy_objective
             - gamma * batch_objective,
             GRB.MAXIMIZE,
         )
@@ -909,8 +920,10 @@ class Optimizer:
                 state["alpha"] = alpha
                 state["beta"] = beta
                 state["gamma"] = gamma
+                state["delta"] = delta
                 state["accuracy_objective"] = self.accuracy_objective()
                 state["resource_objective"] = self.resource_objective()
+                state["energy_objective"] = self.energy_objective()
                 state["batch_objective"] = self.batch_objective()
 
             for task_id_j in range(self.pipeline.num_nodes):
