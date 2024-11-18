@@ -80,6 +80,7 @@ def load_profile(
 def make_task_profiles(
     profiling_info: pd.DataFrame,
     task_accuracies: Dict[str, float],
+    task_energy_usages: Dict[str, float],
     only_measured_profiles: bool,
 ) -> List[Model]:
     """make a task all model variants profiles
@@ -136,6 +137,7 @@ def make_task_profiles(
                     resource_allocation=ResourceAllocation(cpu=cpu_request),
                     measured_profiles=measured_profiles,
                     accuracy=task_accuracies[model_variant],
+                    energy_usage=task_accuracies[model_variant],
                     only_measured_profiles=only_measured_profiles,
                 )
             )
@@ -157,6 +159,7 @@ def generate_simulated_pipeline(
     accuracy_method: Literal["sum", "average", "multiply"],
     normalize_accuracy: bool,
     pipeline_accuracies: Dict[str, Dict[str, float]],
+    pipeline_energy_usages: Dict[str, Dict[str, float]],
     only_measured_profiles: bool,
     profiling_load: bool,
     reference_throughput: str = "max",
@@ -206,6 +209,7 @@ def generate_simulated_pipeline(
         available_model_profiles = make_task_profiles(
             profiling_info=profiling_info,
             task_accuracies=pipeline_accuracies[task_names[i]],
+            task_energy_usages=pipeline_energy_usages[task_names[i]],
             only_measured_profiles=only_measured_profiles,
         )
         task = Task(
@@ -247,6 +251,7 @@ def generate_fake_simulated_pipelines(
     accuracy_method: Literal["sum", "average", "multiply"],
     normalize_accuracy: bool,
     pipeline_accuracies: Dict[str, Dict[str, float]],
+    pipeline_energy_usages: Dict[str, Dict[str, float]],
     only_measured_profiles: bool,
     profiling_load: bool,
     models_num_range: Dict[str, int],
@@ -299,6 +304,7 @@ def generate_fake_simulated_pipelines(
         available_model_profiles = make_task_profiles(
             profiling_info=profiling_info,
             task_accuracies=pipeline_accuracies[task_names[i]],
+            task_energy_usages=pipeline_energy_usages[task_names[i]],
             only_measured_profiles=only_measured_profiles,
         )
         task = Task(
@@ -360,6 +366,7 @@ def generate_fake_pipeline(
                 for new_model_profile in new_model_profiles:
                     new_model_profile.name += sugar_char
                     new_model_profile.accuracy += sugar_val
+                    new_model_profile.energy_usage += sugar_val
                     for allocation_profile in new_model_profile.profiles:
                         allocation_profile.latency += sugar_val
                         allocation_profile.measured_throughput -= sugar_val

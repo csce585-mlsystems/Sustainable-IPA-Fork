@@ -1,0 +1,17 @@
+video:
+  crop:
+    # source https://github.com/ultralytics/yolov5
+    # dummy values, TODO: real values
+    yolov5n: 12000.0
+    yolov5s: 12300.0
+    yolov5m: 12500.0
+    yolov5l: 12700.0
+    yolov5x: 13000.0
+    # https://pytorch.org/vision/stable/models.html#table-of-all-available-classification-weights
+    # dummy values, TODO: real values
+  classification:
+    resnet18: 13300.0
+    resnet34: 13500.0
+    resnet50: 13700.0
+    resnet101: 14000.0
+    resnet152: 143000.0

@@ -2,8 +2,8 @@ import os
 from .obj import setup_obj_store
 
 # defined by the user
-PROJECT_PATH = "/home/cc/ipa"
-OBJ_PATH = "/home/cc/my_mounting_point/"  # object store path
+#PROJECT_PATH = "./"
+#OBJ_PATH = "./my_mounting_point/"  # object store path
 KEY_CONFIG_FILENAME = "key_config_mapper.csv"
 NAMESPACE = "default"
 
@@ -30,6 +30,9 @@ LOG_TO = "print"
 
 # accuracies files
 ACCURACIES_PATH = os.path.join(CONFIGS_PATH, "accuracies.yaml")
+
+# energy usages files
+ENERGY_USAGES_PATH = os.path.join(CONFIGS_PATH, "energy_usages.yaml")
 
 # models metadata file
 MODELS_METADATA_PATH = os.path.join(CONFIGS_PATH, "models-metadata.yaml")

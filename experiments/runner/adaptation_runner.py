@@ -21,7 +21,12 @@ from experiments.utils.constants import (
     FINAL_CONFIGS_PATH,
     FINAL_RESULTS_PATH,
     ACCURACIES_PATH,
+    ENERGY_USAGES_PATH
 )
+#FINAL_CONFIGS_PATH='./'
+#FINAL_RESULTS_PATH='./'
+ACCURACIES_PATH="../../data/configs/accuracies.yaml"
+ENERGY_USAGES_PATH="../../data/configs/energy_usages.yaml"
 
 from optimizer import Adapter
 from experiments.utils.simulation_operations import generate_simulated_pipeline
@@ -43,7 +48,8 @@ def main(config_name: str, type_of: str):
         config_name (str): configuration for an e2e experiment
     """
     # ----------- 1. loading system configs -------------
-    config_path = os.path.join(FINAL_CONFIGS_PATH, f"{config_name}.yaml")
+    #config_path = os.path.join(FINAL_CONFIGS_PATH, f"{config_name}.yaml")
+    config_path = f"{config_name}"
     with open(config_path, "r") as cf:
         config = yaml.safe_load(cf)
     metaseries = config["metaseries"]
@@ -77,6 +83,8 @@ def main(config_name: str, type_of: str):
         config = yaml.safe_load(cf)
     with open(ACCURACIES_PATH, "r") as cf:
         accuracies = yaml.safe_load(cf)
+    with open(ENERGY_USAGES_PATH, "r") as cf:
+        energy_usages = yaml.safe_load(cf)
 
     # profiling config
     series = config["series"]
@@ -106,6 +114,8 @@ def main(config_name: str, type_of: str):
 
     # pipeline accuracy
     pipeline_accuracies = accuracies[pipeline_name]
+
+    pipeline_energy_usages = energy_usages[pipeline_name]
 
     # whether if it is in debug mode or not with contaienrs logs
     debug_mode = config["debug_mode"]
@@ -156,6 +166,7 @@ def main(config_name: str, type_of: str):
         accuracy_method=accuracy_method,
         normalize_accuracy=normalize_accuracy,
         pipeline_accuracies=pipeline_accuracies,
+        pipeline_energy_usages=pipeline_energy_usages,
         only_measured_profiles=only_measured_profiles,
         profiling_load=profiling_load,
         reference_latency=reference_latency,

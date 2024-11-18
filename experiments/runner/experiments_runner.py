@@ -32,6 +32,10 @@ from experiments.utils.constants import (
     FINAL_CONFIGS_PATH,
     FINAL_RESULTS_PATH,
 )
+#PIPLINES_PATH="./"
+#FINAL_CONFIGS_PATH="./"
+#FINAL_RESULTS_PATH="./"
+
 from experiments.utils import logger
 from experiments.utils.workload import make_workload
 
@@ -187,7 +191,8 @@ def main(config_name: str, type_of: str):
         config_name (str): configuration for an e2e experiment
     """
     # ----------- 1. loading system configs -------------
-    config_path = os.path.join(FINAL_CONFIGS_PATH, f"{config_name}.yaml")
+    #config_path = os.path.join(FINAL_CONFIGS_PATH, f"{config_name}.yaml")
+    config_path = f"{config_name}"
     with open(config_path, "r") as cf:
         config = yaml.safe_load(cf)
     metaseries = config["metaseries"]

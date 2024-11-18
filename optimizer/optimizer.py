@@ -810,6 +810,7 @@ class Optimizer:
             energy_usage_parameters[stage][vairant]
             for stage in stages
             for vairant in stages_variants[stage]
+        )
 
         resource_objective = gp.quicksum(
             base_allocations[stage][vairant] * n[stage] * i[stage, vairant]

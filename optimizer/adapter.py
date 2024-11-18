@@ -240,7 +240,6 @@ class Adapter:
                 beta=self.beta,
                 delta=self.delta,
                 gamma=self.gamma,
-                delta=self.delta,
                 arrival_rate=predicted_load,
                 num_state_limit=self.num_state_limit,
             )
