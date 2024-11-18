@@ -171,6 +171,7 @@ class Adapter:
                     node_orders=deepcopy(self.node_names),
                     stage_wise_latencies=deepcopy(self.pipeline.stage_wise_latencies),
                     stage_wise_accuracies=deepcopy(self.pipeline.stage_wise_accuracies),
+                    stage_wise_energy_usages=deepcopy(self.pipeline.stage_wise_energy_usages),
                     stage_wise_throughputs=deepcopy(
                         self.pipeline.stage_wise_throughput
                     ),
@@ -239,6 +240,7 @@ class Adapter:
                 beta=self.beta,
                 delta=self.delta,
                 gamma=self.gamma,
+                delta=self.delta,
                 arrival_rate=predicted_load,
                 num_state_limit=self.num_state_limit,
             )
@@ -304,6 +306,7 @@ class Adapter:
                     node_orders=deepcopy(self.node_names),
                     stage_wise_latencies=deepcopy(self.pipeline.stage_wise_latencies),
                     stage_wise_accuracies=deepcopy(self.pipeline.stage_wise_accuracies),
+                    stage_wise_energy_usages=deepcopy(self.pipeline.stage_wise_energy_usages),
                     stage_wise_throughputs=deepcopy(
                         self.pipeline.stage_wise_throughput
                     ),
@@ -535,12 +538,14 @@ class Adapter:
         node_orders: List[str],
         stage_wise_latencies: List[float],
         stage_wise_accuracies: List[float],
+        stage_wise_energy_usages: List[float],
         stage_wise_throughputs: List[float],
     ):
         saving_config = to_apply_config
         for index, node in enumerate(node_orders):
             saving_config[node]["latency"] = stage_wise_latencies[index]
             saving_config[node]["accuracy"] = stage_wise_accuracies[index]
+            saving_config[node]["energy_usage"] = stage_wise_energy_usages[index]
             saving_config[node]["throughput"] = stage_wise_throughputs[index]
         return saving_config
 

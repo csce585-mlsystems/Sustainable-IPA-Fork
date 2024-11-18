@@ -238,6 +238,17 @@ class Optimizer:
                 model_accuracies[task.name][variant_name] = task.accuracy
         return model_accuracies
 
+    def energy_parameters(self):
+        model_energy_usages = {}
+        inference_graph = deepcopy(self.pipeline.inference_graph)
+        for task in inference_graph:
+            model_energy_usages[task.name] = {}
+            for variant_name in task.variant_names:
+                model_energy_usages[task.name][variant_name] = {}
+                task.model_switch(variant_name)
+                model_energy_usages[task.name][variant.name] = task.energy_usage
+        return model_energy_usages
+
     def base_allocations(self):
         # base allocation of all cases nested dictionary
         # for gorubi solver
@@ -261,6 +272,7 @@ class Optimizer:
         alpha: float,
         beta: float,
         gamma: float,
+        delta: float,
         check_constraints: bool,
         arrival_rate: int,
         num_state_limit: int = None,
@@ -368,6 +380,9 @@ class Optimizer:
                                 f"task_{task_id_j}_accuracy"
                             ] = self.pipeline.inference_graph[task_id_j].accuracy
                             state[
+                                f"task_{task_id_j}_energy_usage"
+                            ] = self.pipeline.inference_graph[task_id_j].energy_usage
+                            state[
                                 f"task_{task_id_j}_measured"
                             ] = self.pipeline.inference_graph[task_id_j].measured
                             state[
@@ -381,6 +396,7 @@ class Optimizer:
                                 task_id_j
                             ].gpu_all_replicas
                         state["pipeline_accuracy"] = self.pipeline.pipeline_accuracy
+                        state["pipeline_energy_usage"] = self.pipeline.pipeline_energy_usage
                         state["pipeline_latency"] = self.pipeline.pipeline_latency
                         state["pipeline_throughput"] = self.pipeline.pipeline_throughput
                         state["pipeline_cpu"] = self.pipeline.pipeline_cpu
@@ -413,7 +429,7 @@ class Optimizer:
                         ] = self.pipeline.inference_graph[task_id_j].replicas
 
                     state["objective"] = self.objective(
-                        alpha=alpha, beta=beta, gamma=gamma
+                        alpha=alpha, beta=beta, gamma=gamma, delta=delta
                     )
                     states.append(state)
                     if num_state_limit is not None:
@@ -431,6 +447,7 @@ class Optimizer:
         alpha: float,
         beta: float,
         gamma: float,
+        delta: float,
         arrival_rate: int,
         num_state_limit: int = None,
     ) -> pd.DataFrame:
@@ -440,6 +457,7 @@ class Optimizer:
             alpha=alpha,
             beta=beta,
             gamma=gamma,
+            delta=delta,
             arrival_rate=arrival_rate,
             num_state_limit=num_state_limit,
         )
@@ -453,6 +471,7 @@ class Optimizer:
         alpha: float,
         beta: float,
         gamma: float,
+        delta: float,
         arrival_rate: int,
         num_state_limit: int,
         dir_path: str = None,
@@ -541,6 +560,7 @@ class Optimizer:
         # coefficients
         base_allocations = self.base_allocations()
         accuracy_parameters = self.accuracy_parameters()
+        energy_usage_parameters = self.energy_usage_parameters()
         if self.only_measured_profiles:
             distinct_batches, throughput_parameters = self.throughput_parameters()
             latency_parameters = self.latency_parameters(
@@ -786,6 +806,11 @@ class Optimizer:
         else:
             raise ValueError(f"Invalid accuracy method {self.pipeline.accuracy_method}")
 
+        energy_objective = gp.quicksum(
+            energy_usage_parameters[stage][vairant]
+            for stage in stages
+            for vairant in stages_variants[stage]
+
         resource_objective = gp.quicksum(
             base_allocations[stage][vairant] * n[stage] * i[stage, vairant]
             for stage in stages
@@ -903,6 +928,7 @@ class Optimizer:
                     state[f"task_{task_id_j}_accuracy"] = self.pipeline.inference_graph[
                         task_id_j
                     ].accuracy
+                    state[f"task_{task_id_j}_energy_usage"] = self.pipeline.inference_graph[task_id_j].energy_usage
                     state[f"task_{task_id_j}_measured"] = self.pipeline.inference_graph[
                         task_id_j
                     ].measured
@@ -913,6 +939,7 @@ class Optimizer:
                         f"task_{task_id_j}_gpu_all_replicas"
                     ] = self.pipeline.inference_graph[task_id_j].gpu_all_replicas
                 state["pipeline_accuracy"] = self.pipeline.pipeline_accuracy
+                state["pipeline_energy_usage"] = self.pipeline.pipeline_energy_usage
                 state["pipeline_latency"] = self.pipeline.pipeline_latency
                 state["pipeline_throughput"] = self.pipeline.pipeline_throughput
                 state["pipeline_cpu"] = self.pipeline.pipeline_cpu
@@ -955,6 +982,7 @@ class Optimizer:
         alpha: float,
         beta: float,
         gamma: float,
+        delta: float,
         arrival_rate: int,
         num_state_limit: int = None,
         batching_cap: int = None,
@@ -966,6 +994,7 @@ class Optimizer:
                 alpha=alpha,
                 beta=beta,
                 gamma=gamma,
+                delta=delta,
                 arrival_rate=arrival_rate,
                 num_state_limit=num_state_limit,
             )
@@ -976,6 +1005,7 @@ class Optimizer:
                 alpha=alpha,
                 beta=beta,
                 gamma=gamma,
+                delta=delta,
                 arrival_rate=arrival_rate,
                 num_state_limit=num_state_limit,
                 dir_path=dir_path,

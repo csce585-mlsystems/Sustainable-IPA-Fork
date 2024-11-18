@@ -53,11 +53,13 @@ class Model:
         measured_profiles: List[Profile],
         only_measured_profiles: bool,
         accuracy: float,
+        energy_usage: float
     ) -> None:
         self.resource_allocation = resource_allocation
         self.measured_profiles = measured_profiles
         self.measured_profiles.sort(key=lambda profile: profile.batch)
         self.accuracy = accuracy / 100
+        self.energy_usage = energy_usage
         self.name = name
         self.only_measured_profiles = only_measured_profiles
         self.profiles, self.latency_model_params = self.regression_model()
@@ -466,6 +468,16 @@ class Task:
         return variants_accuracies
 
     @property
+    def variants_energy_usages(self) -> Dict[str, float]:
+        variants_energy_usages = {}
+        for profile in self.available_model_profiles:
+            variants_energy_usages[profile.name] = profile.energy_usage
+        variants_energy_usages = dict (
+            sorted(variants_energy_usages.items(), key=lambda l: l[1])
+        )
+        return variants_energy_usages
+
+    @property
     def variants_accuracies_normalized(self) -> Dict[str, float]:
         """create normalized accuracies for each task
 
@@ -578,6 +590,10 @@ class Task:
             return self.active_model.accuracy
 
     @property
+    def energy_usage(self):
+        return self.active_model.energy_usage
+
+    @property
     def variant_names(self):
         return list(set(map(lambda l: l.name, self.available_model_profiles)))
 
@@ -677,6 +693,11 @@ class Pipeline:
         return latencies
 
     @property
+    def stage_wise_energy_usages(self):
+        energy_usages = list(map(lambda l: l.energy_usage, self.inference_graph))
+        return energy_usages
+
+    @property
     def stage_wise_replicas(self):
         replicas = list(map(lambda l: l.replicas, self.inference_graph))
         return replicas
@@ -751,6 +772,19 @@ class Pipeline:
                 accuracy += task_accuracy
             accuracy /= len(self.inference_graph)
         return accuracy
+
+    @property
+    def pipeline_energy_usage(self):
+        tasks_energy_usages = {}
+        for task in self.inference_graph:
+            active_variant = task.active_variant
+            energy_usage = task.variants_energy_usages[active_variant]
+            tasks_energy_usages[active_variant] = energy_usage
+        # TODO: how to calculate energy usage over the whole pipeline?
+        energy_usage = 0
+        for task, task_energy_usage in tasks_energy_usages.items():
+            energy_usage += task_energy_usage
+        return energy_usage
 
     @property
     def pipeline_throughput(self):
